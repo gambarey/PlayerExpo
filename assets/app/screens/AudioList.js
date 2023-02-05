@@ -1,15 +1,25 @@
 //import liraries
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import { ScrollView, Text, StyleSheet } from 'react-native';
+import { AudioContext } from '../context/AudioProvider';
 
 // create a component
-const AudioList = () => {
-    return (
-        <View style={styles.container}>
-            <Text>AudioList</Text>
-        </View>
-    );
-};
+export class AudioList extends Component {
+    static contextType = AudioContext
+    render() {
+        return (
+            <ScrollView>
+                {this.context.audioFiles.map(item => <Text style={{
+                    padding: 10,
+                    borderBottomColor: "gray",
+                    borderBottomWidth: 1
+                }}
+                    key={item.id}>{item.filename}
+                </Text>)}
+            </ScrollView>
+        );
+    }
+}
 
 // define your styles
 const styles = StyleSheet.create({
@@ -17,9 +27,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2c3e50',
+        backgroundColor: '#fff',
     },
 });
 
-//make this component available to the app
-export default AudioList;
+export default AudioList
+
+
