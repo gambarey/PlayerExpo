@@ -1,22 +1,31 @@
 //import liraries
 import React, { Component } from 'react';
-import { ScrollView, Text, StyleSheet } from 'react-native';
+import { ScrollView, Text, StyleSheet, Dimensions } from 'react-native';
 import { AudioContext } from '../context/AudioProvider';
+import { RecyclerListView, LayoutProvider } from 'recyclerlistview';
 
 // create a component
 export class AudioList extends Component {
     static contextType = AudioContext
+
+    layoutProvider = new LayoutProvider((i) => "audio", (type, dim) => {
+        dim.width = Dimensions.get("window").width;
+        dim.height = 70;
+    })
+
+    rowRenderer = (type, item) => {
+        return <Text>{item.filename}</Text>
+    }
+
     render() {
         return (
-            <ScrollView>
-                {this.context.audioFiles.map(item => <Text style={{
-                    padding: 10,
-                    borderBottomColor: "gray",
-                    borderBottomWidth: 1
+            <AudioContext.Consumer>
+                {({ dataProvider }) => {
+                    return <RecyclerListView dataProvider={dataProvider}
+                        layoutProvider={this.layoutProvider}
+                        rowRenderer={this.rowRenderer} />
                 }}
-                    key={item.id}>{item.filename}
-                </Text>)}
-            </ScrollView>
+            </AudioContext.Consumer>
         );
     }
 }
