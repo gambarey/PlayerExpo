@@ -42,7 +42,7 @@ export class AudioList extends Component {
                                 layoutProvider={this.layoutProvider}
                                 rowRenderer={this.rowRenderer}
                             />
-                            <OptionModal visible={this.state.optionModalVisible} />
+                            <OptionModal onClose={() => this.setState({...this.state, optionModalVisible: false})} visible={this.state.optionModalVisible} />
                         </Screen>
                     );
                 }}
