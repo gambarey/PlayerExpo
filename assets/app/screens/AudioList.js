@@ -6,7 +6,7 @@ import AudioListItem from '../components/AudioListItem';
 import Screen from '../components/Screen';
 import OptionModal from '../components/OptionModal';
 import { Audio } from 'expo-av';
-import { play, pause } from '../misc/AudioController';
+import { play, pause, resume } from '../misc/AudioController';
 
 export class AudioList extends Component {
     static contextType = AudioContext;
@@ -52,7 +52,7 @@ export class AudioList extends Component {
         if (this.state.soundObj.isLoaded &&
             !this.state.soundObj.isPlaying
             && this.state.currentAudio.id === audio.id) {
-            const status = await this.state.playbackObj.playAsync();
+            const status = await resume(this.state.playbackObj);
             return this.setState({
                 ...this.state,
                 soundObj: status
