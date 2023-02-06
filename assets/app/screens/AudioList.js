@@ -15,9 +15,6 @@ export class AudioList extends Component {
         super(props);
         this.state = {
             optionModalVisible: false,
-            playbackObj: null,
-            soundObj: null,
-            currentAudio: {}
         };
         this.currentItem = {};
     }
@@ -28,35 +25,33 @@ export class AudioList extends Component {
     })
 
     handleAudioPress = async audio => {
+        const { playbackObj, soundObj, currentAudio, updateState } = this.context;
         // play audio for the first time
-        if (this.state.soundObj === null) {
+        if (soundObj === null) {
             const playbackObj = new Audio.Sound();
             const status = await play(playbackObj, audio.uri)
-            return this.setState({
-                ...this.state,
-                currentAudio: audio,
-                playbackObj: playbackObj,
-                soundObj: status
-            });
+            return updateState(this.context, {
+                playbackObj,
+                soundObj: status,
+                currentAudio: audio
+            })
         }
         // pause audio - use uri instead of id?
-        if (this.state.soundObj.isLoaded && this.state.soundObj.isPlaying
-            && this.state.currentAudio.id === audio.id) {
-            const status =  await pause(this.state.playbackObj);
-            return this.setState({
-                ...this.state,
+        if (soundObj.isLoaded && soundObj.isPlaying
+            && currentAudio.id === audio.id) {
+            const status = await pause(playbackObj);
+            return updateState(this.context, {
                 soundObj: status
-            });
+            })
         }
         // resume audio
-        if (this.state.soundObj.isLoaded &&
-            !this.state.soundObj.isPlaying
-            && this.state.currentAudio.id === audio.id) {
-            const status = await resume(this.state.playbackObj);
-            return this.setState({
-                ...this.state,
+        if (soundObj.isLoaded &&
+            !soundObj.isPlaying
+            && currentAudio.id === audio.id) {
+            const status = await resume(playbackObj);
+            return updateState(this.context, {
                 soundObj: status
-            });
+            })
         }
     }
 
