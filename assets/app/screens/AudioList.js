@@ -14,6 +14,7 @@ export class AudioList extends Component {
         this.state = {
             optionModalVisible: false
         };
+        this.currentItem = {};
     }
 
     layoutProvider = new LayoutProvider((i) => "audio", (type, dim) => {
@@ -26,6 +27,7 @@ export class AudioList extends Component {
             title={item.filename}
             duration={item.duration}
             onOptionPress={() => {
+                this.currentItem = item;
                 this.setState({ ...this.state, optionModalVisible: true })
             }}
         />
@@ -42,7 +44,15 @@ export class AudioList extends Component {
                                 layoutProvider={this.layoutProvider}
                                 rowRenderer={this.rowRenderer}
                             />
-                            <OptionModal onClose={() => this.setState({...this.state, optionModalVisible: false})} visible={this.state.optionModalVisible} />
+                            <OptionModal 
+                            onPlayPress={() => {
+                                console.log("Play Pressed");
+                            }}
+                            onPlaylistPress={() => {
+                                console.log("Playlist Pressed");
+                            }}
+                            currentItem={this.currentItem}
+                            onClose={() => this.setState({...this.state, optionModalVisible: false})} visible={this.state.optionModalVisible} />
                         </Screen>
                     );
                 }}
