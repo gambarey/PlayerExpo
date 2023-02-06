@@ -1,10 +1,10 @@
-//import liraries
 import React, { Component } from 'react';
 import { ScrollView, Text, StyleSheet, Dimensions } from 'react-native';
 import { AudioContext } from '../context/AudioProvider';
 import { RecyclerListView, LayoutProvider } from 'recyclerlistview';
+import AudioListItem from '../components/AudioListItem';
+import Screen from '../components/Screen';
 
-// create a component
 export class AudioList extends Component {
     static contextType = AudioContext
 
@@ -14,16 +14,28 @@ export class AudioList extends Component {
     })
 
     rowRenderer = (type, item) => {
-        return <Text>{item.filename}</Text>
+        return <AudioListItem
+            title={item.filename}
+            duration={item.duration}
+            onOptionPress={() => {
+                console.log('onOptionPress');
+            }}
+        />
     }
 
     render() {
         return (
             <AudioContext.Consumer>
                 {({ dataProvider }) => {
-                    return <RecyclerListView dataProvider={dataProvider}
-                        layoutProvider={this.layoutProvider}
-                        rowRenderer={this.rowRenderer} />
+                    return (
+                        <Screen>
+                            <RecyclerListView
+                                dataProvider={dataProvider}
+                                layoutProvider={this.layoutProvider}
+                                rowRenderer={this.rowRenderer}
+                            />
+                        </Screen>
+                    );
                 }}
             </AudioContext.Consumer>
         );
