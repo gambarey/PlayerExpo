@@ -13,7 +13,10 @@ export class AudioList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            optionModalVisible: false
+            optionModalVisible: false,
+            playbackObj: null,
+            soundObj: null,
+            currentAudio: {}
         };
         this.currentItem = {};
     }
@@ -23,12 +26,38 @@ export class AudioList extends Component {
         dim.height = 70;
     })
 
-    handleAudioPress = audio => {
-        const playbackObject = new Audio.Sound();
-        try {
-            playbackObject.loadAsync({ uri: audio.uri }, {shouldPlay: true})
-        } catch (error) {
-            console.log(error);
+    handleAudioPress = async audio => {
+        // play audio for the first time
+        if (this.state.soundObj === null) {
+            const playbackObject = new Audio.Sound();
+            const status = await playbackObject.loadAsync(
+                { uri: audio.uri },
+                { shouldPlay: true }
+            );
+            return this.setState({
+                ...this.state,
+                currentAudio: audio,
+                playbackObj: playbackObject,
+                soundObj: status
+            });
+        }
+        // pause audio
+        if (this.state.soundObj.isLoaded && this.state.soundObj.isPlaying 
+            && this.state.currentAudio.id === audio.id) {
+            const status = await this.state.playbackObj.setStatusAsync( { shouldPlay: false });
+            return this.setState({
+                ...this.state,
+                soundObj: status
+            });
+        }
+        // resume audio
+        if (this.state.soundObj.isLoaded && !this.state.soundObj.isPlaying 
+            && this.state.currentAudio.id === audio.id) {
+            const status = await this.state.playbackObj.setStatusAsync( { shouldPlay: true });
+            return this.setState({
+                ...this.state,
+                soundObj: status
+            });
         }
     }
 
