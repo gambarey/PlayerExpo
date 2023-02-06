@@ -5,6 +5,7 @@ import { RecyclerListView, LayoutProvider } from 'recyclerlistview';
 import AudioListItem from '../components/AudioListItem';
 import Screen from '../components/Screen';
 import OptionModal from '../components/OptionModal';
+import { Audio } from 'expo-av';
 
 export class AudioList extends Component {
     static contextType = AudioContext;
@@ -22,10 +23,20 @@ export class AudioList extends Component {
         dim.height = 70;
     })
 
+    handleAudioPress = audio => {
+        const playbackObject = new Audio.Sound();
+        try {
+            playbackObject.loadAsync({ uri: audio.uri }, {shouldPlay: true})
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     rowRenderer = (type, item) => {
         return <AudioListItem
             title={item.filename}
             duration={item.duration}
+            onAudioPress={() => this.handleAudioPress(item)}
             onOptionPress={() => {
                 this.currentItem = item;
                 this.setState({ ...this.state, optionModalVisible: true })
@@ -44,15 +55,15 @@ export class AudioList extends Component {
                                 layoutProvider={this.layoutProvider}
                                 rowRenderer={this.rowRenderer}
                             />
-                            <OptionModal 
-                            onPlayPress={() => {
-                                console.log("Play Pressed");
-                            }}
-                            onPlaylistPress={() => {
-                                console.log("Playlist Pressed");
-                            }}
-                            currentItem={this.currentItem}
-                            onClose={() => this.setState({...this.state, optionModalVisible: false})} visible={this.state.optionModalVisible} />
+                            <OptionModal
+                                onPlayPress={() => {
+                                    console.log("Play Pressed");
+                                }}
+                                onPlaylistPress={() => {
+                                    console.log("Playlist Pressed");
+                                }}
+                                currentItem={this.currentItem}
+                                onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />
                         </Screen>
                     );
                 }}
