@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import color from '../misc/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Slider from '@react-native-community/slider';
 import PlayerButton from '../components/PlayerButton';
+import { AudioContext } from '../context/AudioProvider';
 
 const { width } = Dimensions.get('window');
 
 const Player = () => {
+    const context = useContext(AudioContext);
     return (
         <View style={styles.container}>
-            <Text style={styles.audioCount}>1 / 99</Text>
+            <Text style={styles.audioCount}>{`1 / ${context.totalAudioCount}`}</Text>
             <View style={styles.midBannerContainer}>
                 <MaterialCommunityIcons
                     name="music-circle"
