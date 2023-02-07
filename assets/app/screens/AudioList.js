@@ -25,16 +25,18 @@ export class AudioList extends Component {
     })
 
     handleAudioPress = async audio => {
-        const { playbackObj, soundObj, currentAudio, updateState } = this.context;
+        const { playbackObj, soundObj, currentAudio, updateState, audioFiles } = this.context;
         // play audio for the first time
         if (soundObj === null) {
             const playbackObj = new Audio.Sound();
             const status = await play(playbackObj, audio.uri)
+            const index = audioFiles.indexOf(audio);
             return updateState(this.context, {
                 playbackObj,
                 soundObj: status,
                 currentAudio: audio,
-                isPlaying: true
+                isPlaying: true,
+                currentAudioIndex: index
             })
         }
         // pause audio - use uri instead of id?
@@ -61,10 +63,12 @@ export class AudioList extends Component {
         // select another audio
         if (soundObj.isLoaded && currentAudio.id !== audio.id) {
             const status = await playNext(playbackObj, audio.uri);
+            const index = audioFiles.indexOf(audio);
             return updateState(this.context, {
                 soundObj: status,
                 currentAudio: audio,
-                isPlaying: true
+                isPlaying: true,
+                currentAudioIndex: index
             })
         }
     }
@@ -74,6 +78,7 @@ export class AudioList extends Component {
             <AudioListItem
                 title={item.filename}
                 isPlaying={extendedState.isPlaying}
+                activeListItem={this.context.currentAudioIndex === index}
                 duration={item.duration}
                 onAudioPress={() => this.handleAudioPress(item)}
                 onOptionPress={() => {
