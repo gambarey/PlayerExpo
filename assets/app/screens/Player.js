@@ -10,27 +10,37 @@ const { width } = Dimensions.get('window');
 
 const Player = () => {
     const context = useContext(AudioContext);
+    const { playbackPosition, playbackDuration } = context;
+
+    const calculateSeekBar = () => {
+        if (playbackPosition !== null && playbackDuration !== null) {
+            return playbackPosition / playbackDuration;
+        }
+        return 0;
+    }
+
     return (
         <View style={styles.container}>
-            <Text style={styles.audioCount}>{`1 / ${context.totalAudioCount}`}</Text>
+            <Text style={styles.audioIndex}>{`${context.currentAudioIndex + 1} / ${context.totalAudioCount}`}</Text>
             <View style={styles.midBannerContainer}>
                 <MaterialCommunityIcons
                     name="music-circle"
                     size={300}
-                    color={color.ACTIVE_BG} />
+                    color={context.isPlaying ? color.ACTIVE_BG : color.FONT_LIGHT} />
             </View>
             <View style={styles.audioPlayerContainer}>
-                <Text numberOfLines={1} style={styles.audioTitle} >Audio File Name</Text>
+                <Text numberOfLines={1} style={styles.audioTitle} >{context.currentAudio.filename}</Text>
                 <Slider
                     style={{ width: width, height: 40 }}
                     minimumValue={0}
                     maximumValue={1}
+                    value={calculateSeekBar()}
                     minimumTrackTintColor={color.FONT_MEDIUM}
                     maximumTrackTintColor={color.ACTIVE_BG}
                 />
                 <View style={styles.audioControllers}>
                     <PlayerButton iconType="backward" />
-                    <PlayerButton onPress={() => console.log("play pressed")} iconType="play" />
+                    <PlayerButton onPress={() => console.log("play pressed")} iconType={context.isPlaying ? "pause" : "play"} />
                     <PlayerButton iconType="forward" />
                 </View>
             </View>

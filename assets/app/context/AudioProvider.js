@@ -17,6 +17,8 @@ export class AudioProvider extends Component {
             currentAudio: {},
             isPlaying: false,
             currentAudioIndex: null,
+            playbackPosition: null,
+            playbackDuration: null,
         };
         this.totalAudioCount = 0
     }
@@ -98,6 +100,8 @@ export class AudioProvider extends Component {
             currentAudio,
             isPlaying,
             currentAudioIndex,
+            playbackPosition,
+            playbackDuration,
         } = this.state;
         // if (permissionError)
         //     return (
@@ -124,8 +128,10 @@ export class AudioProvider extends Component {
                     currentAudio,
                     isPlaying,
                     currentAudioIndex,
-                    updateState: this.updateState,
                     totalAudioCount: this.totalAudioCount,
+                    playbackPosition,
+                    playbackDuration,
+                    updateState: this.updateState,
                 }}
             >
                 {this.props.children}
