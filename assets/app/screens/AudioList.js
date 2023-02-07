@@ -33,7 +33,8 @@ export class AudioList extends Component {
             return updateState(this.context, {
                 playbackObj,
                 soundObj: status,
-                currentAudio: audio
+                currentAudio: audio,
+                isPlaying: true
             })
         }
         // pause audio - use uri instead of id?
@@ -41,7 +42,8 @@ export class AudioList extends Component {
             && currentAudio.id === audio.id) {
             const status = await pause(playbackObj);
             return updateState(this.context, {
-                soundObj: status
+                soundObj: status,
+                isPlaying: false
             })
         }
         // resume audio
@@ -50,59 +52,65 @@ export class AudioList extends Component {
             && currentAudio.id === audio.id) {
             const status = await resume(playbackObj);
             return updateState(this.context, {
-                soundObj: status
+                soundObj: status,
+                isPlaying: true
             });
         }
-    
+
 
         // select another audio
-        if(soundObj.isLoaded && currentAudio.id !== audio.id) {
-        const status = await playNext(playbackObj, audio.uri);
-        return updateState(this.context, {
-            soundObj: status,
-            currentAudio: audio
-        })
+        if (soundObj.isLoaded && currentAudio.id !== audio.id) {
+            const status = await playNext(playbackObj, audio.uri);
+            return updateState(this.context, {
+                soundObj: status,
+                currentAudio: audio,
+                isPlaying: true
+            })
+        }
     }
-}
 
-rowRenderer = (type, item) => {
-    return <AudioListItem
-        title={item.filename}
-        duration={item.duration}
-        onAudioPress={() => this.handleAudioPress(item)}
-        onOptionPress={() => {
-            this.currentItem = item;
-            this.setState({ ...this.state, optionModalVisible: true })
-        }}
-    />
-}
+    rowRenderer = (type, item, index, extendedState) => {
+        return (
+            <AudioListItem
+                title={item.filename}
+                isPlaying={extendedState.isPlaying}
+                duration={item.duration}
+                onAudioPress={() => this.handleAudioPress(item)}
+                onOptionPress={() => {
+                    this.currentItem = item;
+                    this.setState({ ...this.state, optionModalVisible: true })
+                }}
+            />
+        );
+    }
 
-render() {
-    return (
-        <AudioContext.Consumer>
-            {({ dataProvider }) => {
-                return (
-                    <Screen>
-                        <RecyclerListView
-                            dataProvider={dataProvider}
-                            layoutProvider={this.layoutProvider}
-                            rowRenderer={this.rowRenderer}
-                        />
-                        <OptionModal
-                            onPlayPress={() => {
-                                console.log("Play Pressed");
-                            }}
-                            onPlaylistPress={() => {
-                                console.log("Playlist Pressed");
-                            }}
-                            currentItem={this.currentItem}
-                            onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />
-                    </Screen>
-                );
-            }}
-        </AudioContext.Consumer>
-    );
-}
+    render() {
+        return (
+            <AudioContext.Consumer>
+                {({ dataProvider, isPlaying }) => {
+                    return (
+                        <Screen>
+                            <RecyclerListView
+                                dataProvider={dataProvider}
+                                layoutProvider={this.layoutProvider}
+                                rowRenderer={this.rowRenderer}
+                                extendedState={{isPlaying}}
+                            />
+                            <OptionModal
+                                onPlayPress={() => {
+                                    console.log("Play Pressed");
+                                }}
+                                onPlaylistPress={() => {
+                                    console.log("Playlist Pressed");
+                                }}
+                                currentItem={this.currentItem}
+                                onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />
+                        </Screen>
+                    );
+                }}
+            </AudioContext.Consumer>
+        );
+    }
 }
 
 // define your styles
