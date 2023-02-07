@@ -6,7 +6,7 @@ import AudioListItem from '../components/AudioListItem';
 import Screen from '../components/Screen';
 import OptionModal from '../components/OptionModal';
 import { Audio } from 'expo-av';
-import { play, pause, resume } from '../misc/AudioController';
+import { play, pause, resume, playNext } from '../misc/AudioController';
 
 export class AudioList extends Component {
     static contextType = AudioContext;
@@ -51,48 +51,58 @@ export class AudioList extends Component {
             const status = await resume(playbackObj);
             return updateState(this.context, {
                 soundObj: status
-            })
+            });
         }
-    }
+    
 
-    rowRenderer = (type, item) => {
-        return <AudioListItem
-            title={item.filename}
-            duration={item.duration}
-            onAudioPress={() => this.handleAudioPress(item)}
-            onOptionPress={() => {
-                this.currentItem = item;
-                this.setState({ ...this.state, optionModalVisible: true })
+        // select another audio
+        if(soundObj.isLoaded && currentAudio.id !== audio.id) {
+        const status = await playNext(playbackObj, audio.uri);
+        return updateState(this.context, {
+            soundObj: status,
+            currentAudio: audio
+        })
+    }
+}
+
+rowRenderer = (type, item) => {
+    return <AudioListItem
+        title={item.filename}
+        duration={item.duration}
+        onAudioPress={() => this.handleAudioPress(item)}
+        onOptionPress={() => {
+            this.currentItem = item;
+            this.setState({ ...this.state, optionModalVisible: true })
+        }}
+    />
+}
+
+render() {
+    return (
+        <AudioContext.Consumer>
+            {({ dataProvider }) => {
+                return (
+                    <Screen>
+                        <RecyclerListView
+                            dataProvider={dataProvider}
+                            layoutProvider={this.layoutProvider}
+                            rowRenderer={this.rowRenderer}
+                        />
+                        <OptionModal
+                            onPlayPress={() => {
+                                console.log("Play Pressed");
+                            }}
+                            onPlaylistPress={() => {
+                                console.log("Playlist Pressed");
+                            }}
+                            currentItem={this.currentItem}
+                            onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />
+                    </Screen>
+                );
             }}
-        />
-    }
-
-    render() {
-        return (
-            <AudioContext.Consumer>
-                {({ dataProvider }) => {
-                    return (
-                        <Screen>
-                            <RecyclerListView
-                                dataProvider={dataProvider}
-                                layoutProvider={this.layoutProvider}
-                                rowRenderer={this.rowRenderer}
-                            />
-                            <OptionModal
-                                onPlayPress={() => {
-                                    console.log("Play Pressed");
-                                }}
-                                onPlaylistPress={() => {
-                                    console.log("Playlist Pressed");
-                                }}
-                                currentItem={this.currentItem}
-                                onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />
-                        </Screen>
-                    );
-                }}
-            </AudioContext.Consumer>
-        );
-    }
+        </AudioContext.Consumer>
+    );
+}
 }
 
 // define your styles
