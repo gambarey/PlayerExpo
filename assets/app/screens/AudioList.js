@@ -7,6 +7,7 @@ import Screen from '../components/Screen';
 import OptionModal from '../components/OptionModal';
 import { Audio } from 'expo-av';
 import { play, pause, resume, playNext } from '../misc/AudioController';
+import { storeAudioForNextOpening } from '../misc/helper';
 
 export class AudioList extends Component {
     static contextType = AudioContext;
@@ -48,6 +49,7 @@ export class AudioList extends Component {
                     playbackPosition: null,
                     playbackDuration: null,
                 });
+                return await storeAudioForNextOpening(this.context.audioFiles[0], 0);
             }
             // play next audio
             const audio = this.context.audioFiles[nextAudioIndex];
@@ -58,6 +60,7 @@ export class AudioList extends Component {
                 isPlaying: true,
                 currentAudioIndex: nextAudioIndex
             });
+            await storeAudioForNextOpening(audio, nextAudioIndex);
         }
     };
 
@@ -75,7 +78,8 @@ export class AudioList extends Component {
                 isPlaying: true,
                 currentAudioIndex: index
             });
-            return playbackObj.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate);
+            playbackObj.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate);
+            return storeAudioForNextOpening(audio, index);
         }
         // pause audio - use uri instead of id?
         if (soundObj.isLoaded && soundObj.isPlaying
@@ -102,13 +106,18 @@ export class AudioList extends Component {
         if (soundObj.isLoaded && currentAudio.id !== audio.id) {
             const status = await playNext(playbackObj, audio.uri);
             const index = audioFiles.indexOf(audio);
-            return updateState(this.context, {
+            updateState(this.context, {
                 soundObj: status,
                 currentAudio: audio,
                 isPlaying: true,
                 currentAudioIndex: index
-            })
+            });
+            return storeAudioForNextOpening(audio, index);
         }
+    }
+
+    componentDidMount() {
+        this.context.loadPreviousAudio();
     }
 
     rowRenderer = (type, item, index, extendedState) => {
@@ -131,6 +140,9 @@ export class AudioList extends Component {
         return (
             <AudioContext.Consumer>
                 {({ dataProvider, isPlaying }) => {
+                    if (!dataProvider._data.length) {
+                        return null;
+                    }
                     return (
                         <Screen>
                             <RecyclerListView

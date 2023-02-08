@@ -2,6 +2,7 @@ import React, { Component, createContext, useState } from 'react';
 import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import * as MediaLibrary from "expo-media-library";
 import { DataProvider } from 'recyclerlistview';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const AudioContext = createContext()
 export class AudioProvider extends Component {
@@ -50,6 +51,28 @@ export class AudioProvider extends Component {
             dataProvider: dataProvider.cloneWithRows([...audioFiles, ...media.assets]),
             audioFiles: [...audioFiles, ...media.assets]
         });
+    };
+
+    loadPreviousAudio = async () => {
+        let previousAudio = await AsyncStorage.getItem("previousAudio");
+        let currentAudio;
+        let currentAudioIndex;
+
+        if (previousAudio === null) {
+            currentAudio = this.state.audioFiles[0];
+            currentAudioIndex = 0;
+        } else {
+            previousAudio = JSON.parse(previousAudio);
+            currentAudio = previousAudio.audio;
+            currentAudioIndex = previousAudio.index;
+        }
+
+        this.setState({
+            ...this.state,
+            currentAudio,
+            currentAudioIndex,
+        });
+
     };
 
     getPermission = async () => {
@@ -132,6 +155,7 @@ export class AudioProvider extends Component {
                     playbackPosition,
                     playbackDuration,
                     updateState: this.updateState,
+                    loadPreviousAudio: this.loadPreviousAudio,
                 }}
             >
                 {this.props.children}

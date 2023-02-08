@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import color from '../misc/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,6 +17,14 @@ const Player = () => {
             return playbackPosition / playbackDuration;
         }
         return 0;
+    }
+
+    useEffect(() => {
+        context.loadPreviousAudio();
+    }, []);
+
+    if (!context.currentAudio) {
+        return null;
     }
 
     return (
