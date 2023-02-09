@@ -1,17 +1,24 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import PlayListInputModal from '../components/PlayListInputModal';
 import color from '../misc/color';
 
 const PlayList = () => {
+    const [modalVisible, setModalVisible] = useState(false);
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <TouchableOpacity style={styles.playListBanner}>
                 <Text>My Favourite</Text>
                 <Text style={styles.audioCount}>0 songs</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log("adding to playlist")} style={{marginTop: 15}} >
+            <TouchableOpacity
+                onPress={() => setModalVisible(true)}
+                style={{ marginTop: 15 }} >
                 <Text style={styles.playListBtn} >+ Add New Playlist</Text>
             </TouchableOpacity>
+            <PlayListInputModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)} />
         </ScrollView>
     );
 };
