@@ -155,6 +155,9 @@ export class AudioList extends Component {
                                     console.log("Play Pressed");
                                 }}
                                 onPlaylistPress={() => {
+                                    this.context.updateState(this.context, {
+                                        addToPlayList: this.currentItem
+                                    });
                                     this.props.navigation.navigate('PlayList');
                                 }}
                                 currentItem={this.currentItem}
