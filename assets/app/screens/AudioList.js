@@ -155,7 +155,7 @@ export class AudioList extends Component {
                                     console.log("Play Pressed");
                                 }}
                                 onPlaylistPress={() => {
-                                    console.log("Playlist Pressed");
+                                    this.props.navigation.navigate('PlayList');
                                 }}
                                 currentItem={this.currentItem}
                                 onClose={() => this.setState({ ...this.state, optionModalVisible: false })} visible={this.state.optionModalVisible} />

@@ -11,19 +11,25 @@ const AppNavigator = () => {
     return <Tab.Navigator>
         <Tab.Screen name='AudioList' component={AudioList} options={{
             tabBarIcon: ({ color, size }) => (
-                <Entypo name="folder-music" size={size} color={color} />
+                <Entypo name="folder-music"
+                    size={size}
+                    color={color} />
             )
         }
         } />
         <Tab.Screen name='Player' component={Player} options={{
             tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="headphones" size={size} color={color} />
+                <MaterialCommunityIcons name="headphones"
+                    size={size}
+                    color={color} />
             )
         }
         } />
         <Tab.Screen name='PlayList' component={PlayList} options={{
             tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="playlist-music" size={size} color={color} />
+                <MaterialCommunityIcons name="playlist-music"
+                    size={size}
+                    color={color} />
             )
         }
         } />
