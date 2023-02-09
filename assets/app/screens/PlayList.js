@@ -4,9 +4,12 @@ import PlayListInputModal from '../components/PlayListInputModal';
 import color from '../misc/color';
 import { AudioContext } from '../context/AudioProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PlayListDetail from '../components/PlayListDetail';
 
+let selectedPlayList = {};
 const PlayList = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [showPlayList, setShowPlayList] = useState(false);
 
   const context = useContext(AudioContext)
   const { playList, addToPlayList, updateState } = context;
@@ -68,64 +71,78 @@ const PlayList = () => {
 
         updatedList = oldList.filter(list => {
           if (list.id === playList.id) {
+            // check if audio already added to this playlist
             for (let audio of list.audios) {
               if (audio.id === addToPlayList.id) {
                 sameAudio = true;
                 return;
               }
             }
+            // otherwise add audio to this playlist
             list.audios = [...list.audios, addToPlayList];
           }
           return list;
         });
       }
+
       if (sameAudio) {
         Alert.alert("Same audio found",
-          `${addToPlayList.filename} already added to this playlist`);
+          `${addToPlayList.filename} already added to this playlist`
+        );
         sameAudio = false;
         return updateState(context, { addToPlayList: null });
       }
+
       updateState(context, { addToPlayList: null, playList: [...updatedList] });
       return AsyncStorage.setItem('playlist', JSON.stringify([...updatedList]));
     }
+    // if there is no audio selected then open the playlist
+    selectedPlayList = playList;
+    setShowPlayList(true);
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {playList.length
-        ? playList.map(item => (
-          <TouchableOpacity
-            key={item.id.toString()}
-            style={styles.playListBanner}
-            onPress={() => handleBannerPress(item)}
-          >
-            <Text>{item.title}</Text>
-            <Text style={styles.audioCount}>
-              {item.audios.length === 1
-                ? `${item.audios.length} Song`
-                : `${item.audios.length} Songs`
-              }
-            </Text>
-          </TouchableOpacity>
-        ))
-        : null
-      }
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        {playList.length
+          ? playList.map(item => (
+            <TouchableOpacity
+              key={item.id.toString()}
+              style={styles.playListBanner}
+              onPress={() => handleBannerPress(item)}
+            >
+              <Text>{item.title}</Text>
+              <Text style={styles.audioCount}>
+                {item.audios.length === 1
+                  ? `${item.audios.length} Song`
+                  : `${item.audios.length} Songs`
+                }
+              </Text>
+            </TouchableOpacity>
+          ))
+          : null
+        }
 
-      <TouchableOpacity
-        onPress={() => setModalVisible(true)}
-        style={{ marginTop: 15 }} >
-        <Text style={styles.playListBtn} >+ Add New Playlist</Text>
-      </TouchableOpacity>
-      <PlayListInputModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSubmit={(playlistName) => createPlayList(playlistName)}
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={{ marginTop: 15 }} >
+          <Text style={styles.playListBtn} >+ Add New Playlist</Text>
+        </TouchableOpacity>
+        <PlayListInputModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSubmit={(playlistName) => createPlayList(playlistName)}
+        />
+      </ScrollView>
+      <PlayListDetail
+        visible={showPlayList}
+        playList={selectedPlayList}
+        onClose={() => setShowPlayList(false)}
       />
-    </ScrollView>
+    </>
   );
 };
 
-// define your styles
 const styles = StyleSheet.create({
   container: {
     padding: 20,
