@@ -73,8 +73,9 @@ export const selectAudio = async (audio, context) => {
       const status = await pause(playbackObj);
       return updateState(context, {
         soundObj: status,
-        isPlaying: false
-      })
+        isPlaying: false,
+        playbackPosition: status.positionMillis,
+      });
     }
     // resume audio
     if (soundObj.isLoaded &&
@@ -181,6 +182,22 @@ export const changeAudio = async (context, select) => {
     storeAudioForNextOpening(audio, index);
   } catch (error) {
     console.log("error inside changeAudio", error.message)
+  }
+}
+
+export const moveAudio = async (context, value) => {
+  const { soundObj, isPlaying, playbackObj, updateState } = context;
+  if (soundObj === null || !isPlaying)
+    return;
+  try {
+    const status = await playbackObj.setPositionAsync(Math.floor(value * soundObj.durationMillis));
+    updateState(context, {
+      soundObj: status,
+      playbackPosition: status.positionMillis
+    })
+    await resume(playbackObj);
+  } catch (error) {
+    console.log("error inside onSlidingComplete callback", error.message)
   }
 }
 

@@ -1,16 +1,17 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import color from '../misc/color';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Slider from '@react-native-community/slider';
 import PlayerButton from '../components/PlayerButton';
 import { AudioContext } from '../context/AudioProvider';
-import { play, pause, resume, playNext, selectAudio, changeAudio } from '../misc/AudioController';
+import { play, pause, resume, playNext, selectAudio, changeAudio, moveAudio } from '../misc/AudioController';
 import { convertTime, storeAudioForNextOpening } from '../misc/helper';
 
 const { width } = Dimensions.get('window');
 
 const Player = () => {
+  const [currentPosition, setCurrentPosition] = useState(0);
   const context = useContext(AudioContext);
   const { playbackPosition, playbackDuration } = context;
 
@@ -68,7 +69,7 @@ const Player = () => {
           }}
         >
           <Text>{convertTime(context.currentAudio.duration)}</Text>
-          <Text>{renderCurrentTime()}</Text>
+          <Text>{currentPosition ? currentPosition : renderCurrentTime()}</Text>
         </View>
         <Slider
           style={{ width: width, height: 40 }}
@@ -77,6 +78,21 @@ const Player = () => {
           value={calculateSeekBar()}
           minimumTrackTintColor={color.FONT_MEDIUM}
           maximumTrackTintColor={color.ACTIVE_BG}
+          onValueChange={value => {
+            setCurrentPosition(convertTime(value * context.currentAudio.duration));
+          }}
+          onSlidingStart={async () => {
+            if (!context.isPlaying)
+              return;
+            try {
+              await pause(context.playbackObj);
+            } catch (error) {
+              console.log("error inside onSlidingStart callback", error.message)
+            }
+          }}
+          onSlidingComplete={async value =>
+            await moveAudio(context, value)
+          }
         />
         <View style={styles.audioControllers}>
           <PlayerButton
