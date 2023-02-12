@@ -79,7 +79,8 @@ const Player = () => {
           minimumTrackTintColor={color.FONT_MEDIUM}
           maximumTrackTintColor={color.ACTIVE_BG}
           onValueChange={value => {
-            setCurrentPosition(convertTime(value * context.currentAudio.duration));
+            setCurrentPosition(
+              convertTime(value * context.currentAudio.duration));
           }}
           onSlidingStart={async () => {
             if (!context.isPlaying)
@@ -90,9 +91,10 @@ const Player = () => {
               console.log("error inside onSlidingStart callback", error.message)
             }
           }}
-          onSlidingComplete={async value =>
-            await moveAudio(context, value)
-          }
+          onSlidingComplete={async value => {
+            await moveAudio(context, value);
+            setCurrentPosition(0);
+          }}
         />
         <View style={styles.audioControllers}>
           <PlayerButton

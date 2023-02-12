@@ -4,17 +4,17 @@ import PlayListInputModal from '../components/PlayListInputModal';
 import color from '../misc/color';
 import { AudioContext } from '../context/AudioProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PlayListDetail from '../components/PlayListDetail';
+import PlayListDetail from './PlayListDetail';
 
 let selectedPlayList = {};
-const PlayList = () => {
+const PlayList = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [showPlayList, setShowPlayList] = useState(false);
 
   const context = useContext(AudioContext)
   const { playList, addToPlayList, updateState } = context;
 
-  const createPlayList = async playlistName => {
+  const createPlayList = async playListName => {
     const result = await AsyncStorage.getItem('playlist');
     if (result !== null) {
       const audios = [];
@@ -23,7 +23,7 @@ const PlayList = () => {
       }
       const newList = {
         id: Date.now(),
-        title: playlistName,
+        title: playListName,
         audios: audios
       }
 
@@ -98,8 +98,9 @@ const PlayList = () => {
     }
     // if there is no audio selected then open the playlist
     selectedPlayList = playList;
-    setShowPlayList(true);
-  }
+    // setShowPlayList(true);
+    navigation.navigate('PlayListDetail', playList);
+  };
 
   return (
     <>
@@ -132,6 +133,7 @@ const PlayList = () => {
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           onSubmit={(playlistName) => createPlayList(playlistName)}
+          // context={context}
         />
       </ScrollView>
       <PlayListDetail
