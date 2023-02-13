@@ -3,7 +3,8 @@ import { storeAudioForNextOpening } from "./helper";
 // play audio
 export const play = async (playbackObj, uri, lastPosition) => {
   try {
-    if (!lastPosition) return await playbackObj.loadAsync(
+    if (!lastPosition) 
+    return await playbackObj.loadAsync(
       { uri },
       { shouldPlay: true, progressUpdateIntervalMillis: 1000 }
     );

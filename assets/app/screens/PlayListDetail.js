@@ -1,5 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Modal, FlatList, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  FlatList,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import color from '../misc/color';
 import AudioListItem from '../components/AudioListItem';
 import { AudioContext } from '../context/AudioProvider';
@@ -7,9 +15,10 @@ import { selectAudio } from '../misc/AudioController';
 import OptionModal from '../components/OptionModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const PlayListDetail = (props) => {
+const PlayListDetail = props => {
   const context = useContext(AudioContext);
-  const playList = props.playList; ////// props.playList / props.route.params
+  // console.log(props.route.params)
+  const playList = props.route.params; ////// props.playList / props.route.params
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState({});
@@ -18,30 +27,33 @@ const PlayListDetail = (props) => {
   const playAudio = async audio => {
     await selectAudio(audio, context, {
       activePlayList: playList,
-      isPlayListRunning: true
+      isPlayListRunning: true,
     });
   };
 
   const closeModal = () => {
-    setModalVisible(false);
     setSelectedItem({});
+    setModalVisible(false);
   };
 
   const removeAudio = async () => {
     let isPlaying = context.isPlaying;
     let isPlayListRunning = context.isPlayListRunning;
-    let activePlayList = context.activePlayList;
-    let playbackPosition = context.playbackPosition;
     let soundObj = context.soundObj;
+    let playbackPosition = context.playbackPosition;
+    let activePlayList = context.activePlayList;
 
-    if (context.isPlayListRunning && selectedItem.id === context.currentAudio.id) {
+    if (
+      context.isPlayListRunning &&
+      context.currentAudio.id === selectedItem.id
+    ) {
       await context.playbackObj.stopAsync();
       await context.playbackObj.unloadAsync();
       isPlaying = false;
       isPlayListRunning = false;
-      activePlayList = [];
-      playbackPosition = 0;
       soundObj = null;
+      playbackPosition = 0;
+      activePlayList = [];
     }
 
     const newAudios = audios.filter(audio => audio.id !== selectedItem.id);
@@ -50,11 +62,11 @@ const PlayListDetail = (props) => {
       const oldPlayLists = JSON.parse(result);
       const updatedPlayLists = oldPlayLists.filter(item => {
         if (item.id === playList.id) {
-          item.audios = newAudios
+          item.audios = newAudios;
         }
 
-        return item
-      })
+        return item;
+      });
 
       AsyncStorage.setItem('playlist', JSON.stringify(updatedPlayLists));
       context.updateState(context, {
@@ -71,12 +83,66 @@ const PlayListDetail = (props) => {
     closeModal();
   };
 
+  const removePlaylist = async () => {
+    let isPlaying = context.isPlaying;
+    let isPlayListRunning = context.isPlayListRunning;
+    let soundObj = context.soundObj;
+    let playbackPosition = context.playbackPosition;
+    let activePlayList = context.activePlayList;
+
+    if (context.isPlayListRunning &&
+      activePlayList.id === playList.id) {
+      await context.playbackObj.stopAsync();
+      await context.playbackObj.unloadAsync();
+      isPlaying = false;
+      isPlayListRunning = false;
+      soundObj = null;
+      playbackPosition = 0;
+      activePlayList = [];
+    }
+
+    const result = await AsyncStorage.getItem('playlist');
+    if (result !== null) {
+      const oldPlayLists = JSON.parse(result);
+      const updatedPlayLists = oldPlayLists.filter(
+        item => item.id !== playList.id
+      );
+
+      AsyncStorage.setItem('playlist', JSON.stringify(updatedPlayLists));
+      context.updateState(context, {
+        playList: updatedPlayLists,
+        isPlayListRunning,
+        activePlayList,
+        playbackPosition,
+        isPlaying,
+        soundObj,
+      });
+    }
+
+    props.navigation.goBack();
+  };
+
   return (
-    // console.log(playList.title)
     <>
       <View style={styles.container}>
-        <Text style={styles.title}>{playList.title}</Text>
-        {audios.length ?
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 15,
+            // paddingVertical: 10,
+            // borderBottomWidth: 1,
+            // borderBottomColor: color.BORDER
+          }}
+        >
+          <Text style={styles.title}>{playList.title}</Text>
+          <TouchableOpacity onPress={removePlaylist}>
+            <Text style={[styles.title, { color: "red" }]}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+        {audios.length ? (
           <FlatList
             contentContainerStyle={styles.listContainer}
             data={audios}
@@ -97,7 +163,8 @@ const PlayListDetail = (props) => {
               </View>
             )}
           />
-          : <Text
+        ) : (
+          <Text
             style={{
               fontWeight: "bold",
               color: color.FONT_LIGHT,
@@ -105,6 +172,7 @@ const PlayListDetail = (props) => {
               paddingTop: 50,
               textAlign: 'center'
             }}>No audio found</Text>
+        )
         }
 
       </View>
@@ -124,9 +192,9 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 0,
-    alignSelf: 'center',
+    alignItems: 'center',
     width: width - 15,
-    height: height - 250,
+    height: height - 350,
     backgroundColor: 'white',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,

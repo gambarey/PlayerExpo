@@ -1,10 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import PlayListInputModal from '../components/PlayListInputModal';
 import color from '../misc/color';
 import { AudioContext } from '../context/AudioProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import PlayListDetail from './PlayListDetail';
+import PlayListDetail from '../components/PlayListDetail';
 
 let selectedPlayList = {};
 const PlayList = ({ navigation }) => {
