@@ -1,12 +1,13 @@
-import React, { Component, createContext, useState } from 'react';
-import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import React, { Component, createContext } from 'react';
+import { Alert } from 'react-native';
 import * as MediaLibrary from "expo-media-library";
 import { DataProvider } from 'recyclerlistview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import { storeAudioForNextOpening } from '../misc/helper';
+import { playNext } from '../misc/AudioController';
 
-export const AudioContext = createContext()
+export const AudioContext = createContext();
 export class AudioProvider extends Component {
 
   constructor(props) {
@@ -27,7 +28,7 @@ export class AudioProvider extends Component {
       playbackPosition: null,
       playbackDuration: null,
     };
-    this.totalAudioCount = 0
+    this.totalAudioCount = 0;
   }
 
   permissionAlert = () => {
@@ -38,11 +39,12 @@ export class AudioProvider extends Component {
       }, {
         text: "Cancel",
         onPress: () => this.permissionAlert()
-      }])
-  }
+      },
+      ]);
+  };
 
   getAudioFiles = async () => {
-    const { dataProvider, audioFiles } = this.state
+    const { dataProvider, audioFiles } = this.state;
     let media = await MediaLibrary.getAssetsAsync({
       mediaType: "audio",
     });
@@ -50,12 +52,12 @@ export class AudioProvider extends Component {
       mediaType: "audio",
       first: media.totalCount,
     });
-    this.totalAudioCount = media.totalCount
+    this.totalAudioCount = media.totalCount;
 
     this.setState({
       ...this.state,
-      dataProvider: dataProvider.cloneWithRows([...audioFiles, ...media.assets]),
-      audioFiles: [...audioFiles, ...media.assets]
+      dataProvider: dataProvider.cloneWithRows([...audioFiles, ...media.assets,]),
+      audioFiles: [...audioFiles, ...media.assets],
     });
   };
 
@@ -90,26 +92,26 @@ export class AudioProvider extends Component {
     // }
     const permission = await MediaLibrary.getPermissionsAsync()
     if (permission.granted) {
-      this.getAudioFiles()
+      this.getAudioFiles();
     }
 
     if (!permission.canAskAgain && !permission.granted) {
       this.setState({ ...this.state, permissionError: true });
     }
     if (!permission.granted && permission.canAskAgain) {
-      const { status, canAskAgain } = await
-        MediaLibrary.requestPermissionsAsync();
+      const { status, canAskAgain } =
+        await MediaLibrary.requestPermissionsAsync();
       if (status === "denied" && canAskAgain) {
-        this.permissionAlert()
+        this.permissionAlert();
       }
       if (status === "granted") {
-        this.getAudioFiles()
+        this.getAudioFiles();
       }
       if (status === "denied" && !canAskAgain) {
-        this.setState({ ...this.state, permissionError: true })
+        this.setState({ ...this.state, permissionError: true });
       }
     }
-  }
+  };
 
   onPlaybackStatusUpdate = async playbackStatus => {
     if (playbackStatus.isLoaded && playbackStatus.isPlaying) {
@@ -119,33 +121,35 @@ export class AudioProvider extends Component {
       });
     }
 
-if  (playbackStatus.isLoaded && !playbackStatus.isPlaying) {
-    storeAudioForNextOpening(
-      this.state.currentAudio,
-      this.state.currentAudioIndex,
-      playbackStatus.positionMillis
-    );
-  }
+    if (playbackStatus.isLoaded && !playbackStatus.isPlaying) {
+      storeAudioForNextOpening(
+        this.state.currentAudio,
+        this.state.currentAudioIndex,
+        playbackStatus.positionMillis
+      );
+    }
 
     if (playbackStatus.didJustFinish) {
       if (this.state.isPlayListRunning) {
         let audio;
-        const indexOnPlayList = this.state.activePlayList.findIndex(
-          ({ id }) => id === this.state.currentAudio.id);
+        const indexOnPlayList = this.state.activePlayList.audios.findIndex(
+          ({ id }) => id === this.state.currentAudio.id
+        );
         const nextIndex = indexOnPlayList + 1;
         audio = this.state.activePlayList.audios[nextIndex];
 
         if (!audio) audio = this.state.activePlayList.audios[0];
 
         const indexOnAllList = this.state.audioFiles.findIndex(
-          ({ id }) => id === audio.id);
+          ({ id }) => id === audio.id
+        );
 
         const status = await playNext(this.state.playbackObj, audio.uri);
         return this.updateState(this, {
           soundObj: status,
-          currentAudio: audio,
           isPlaying: true,
-          currentAudioIndex: indexOnAllList
+          currentAudio: audio,
+          currentAudioIndex: indexOnAllList,
         });
       }
 
@@ -153,11 +157,10 @@ if  (playbackStatus.isLoaded && !playbackStatus.isPlaying) {
       // last audio in the list (no next audio)
       if (nextAudioIndex >= this.totalAudioCount) {
         this.state.playbackObj.unloadAsync();
-        return this.updateState(this, {
+        this.updateState(this, {
           soundObj: null,
           currentAudio: this.state.audioFiles[0],
           isPlaying: false,
-          // currentAudioIndex: [0],
           currentAudioIndex: 0,
           playbackPosition: null,
           playbackDuration: null,
