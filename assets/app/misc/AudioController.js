@@ -110,7 +110,41 @@ export const selectAudio = async (audio, context, playListInfo) => {
   } catch (error) {
     console.log("error inside selectAudio", error.message)
   }
+};
 
+export const selectAudioFromPlaylist = async (context, select) => {
+  const { activePlayList, playbackObj, currentAudio, updateState, audioFiles } = context;
+  let audio;
+  let defaultIndex;
+  let nextIndex;
+
+  const indexOnPlayList = activePlayList.audios.findIndex(
+    ({ id }) => id === currentAudio.id);
+
+  if (select === "next") {
+    nextIndex = indexOnPlayList + 1;
+    defaultIndex = 0;
+  }
+
+  if (select === "previous") {
+    nextIndex = indexOnPlayList - 1;
+    defaultIndex = activePlayList.audios.length - 1;
+  }
+
+  audio = activePlayList.audios[nextIndex];
+
+  if (!audio) audio = activePlayList.audios[defaultIndex];
+
+  const indexOnAllList = audioFiles.findIndex(
+    ({ id }) => id === audio.id);
+
+  const status = await playNext(playbackObj, audio.uri);
+  return updateState(context, {
+    soundObj: status,
+    currentAudio: audio,
+    isPlaying: true,
+    currentAudioIndex: indexOnAllList
+  });
 }
 
 export const changeAudio = async (context, select) => {
@@ -120,8 +154,11 @@ export const changeAudio = async (context, select) => {
     totalAudioCount,
     audioFiles,
     updateState,
-    onPlaybackStatusUpdate
+    onPlaybackStatusUpdate,
+    isPlayListRunning
   } = context;
+
+  if (isPlayListRunning) return selectAudioFromPlaylist(context, select);
   try {
     const { isLoaded } = await playbackObj.getStatusAsync();
     const isLastAudio = currentAudioIndex + 1 === totalAudioCount; ////
