@@ -4,6 +4,7 @@ import * as MediaLibrary from "expo-media-library";
 import { DataProvider } from 'recyclerlistview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
+import { storeAudioForNextOpening } from '../misc/helper';
 
 export const AudioContext = createContext()
 export class AudioProvider extends Component {
@@ -117,6 +118,15 @@ export class AudioProvider extends Component {
         playbackDuration: playbackStatus.durationMillis
       });
     }
+
+if  (playbackStatus.isLoaded && !playbackStatus.isPlaying) {
+    storeAudioForNextOpening(
+      this.state.currentAudio,
+      this.state.currentAudioIndex,
+      playbackStatus.positionMillis
+    );
+  }
+
     if (playbackStatus.didJustFinish) {
       if (this.state.isPlayListRunning) {
         let audio;
