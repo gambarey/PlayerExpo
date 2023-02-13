@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   FlatList,
   Dimensions,
   TouchableOpacity,
@@ -17,7 +16,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PlayListDetail = props => {
   const context = useContext(AudioContext);
-  // console.log(props.route.params)
   const playList = props.route.params; ////// props.playList / props.route.params
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -132,14 +130,18 @@ const PlayListDetail = props => {
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 15,
-            // paddingVertical: 10,
-            // borderBottomWidth: 1,
-            // borderBottomColor: color.BORDER
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: color.BORDER
           }}
         >
           <Text style={styles.title}>{playList.title}</Text>
           <TouchableOpacity onPress={removePlaylist}>
-            <Text style={[styles.title, { color: "red" }]}>Remove</Text>
+            <Text style={[styles.title, { 
+              backgroundColor: color.FONT_LIGHT, 
+              padding: 15, 
+              borderRadius: 5, 
+              fontSize: 12 }]}>Remove PlayList</Text>
           </TouchableOpacity>
         </View>
         {audios.length ? (
@@ -174,7 +176,10 @@ const PlayListDetail = props => {
             }}>No audio found</Text>
         )
         }
-
+        <Text
+          style={{
+            color: color.FONT_LIGHT
+          }}>Press "back" to see all Playlists</Text>
       </View>
       <OptionModal
         visible={modalVisible}
@@ -185,30 +190,30 @@ const PlayListDetail = props => {
   );
 };
 
-const { width, height } = Dimensions.get('window');
+// const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   //////just alignCenter and remove line above width and height
   container: {
-    position: 'absolute',
-    bottom: 0,
+    // position: 'absolute',
+    // bottom: 0,
     alignItems: 'center',
-    width: width - 15,
-    height: height - 350,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    // width: width - 15,
+    // height: height - 350,
+    // backgroundColor: 'white',
+    // borderTopLeftRadius: 30,
+    // borderTopRightRadius: 30,
   },
   listContainer: {
-    padding: 20
+    padding: 20,
   },
   title: {
     textAlign: 'center',
     fontSize: 20,
     paddingVertical: 5,
     fontWeight: 'bold',
-    color: color.ACTIVE_BG
-  }
+    color: color.ACTIVE_BG,
+  },
 });
 
 export default PlayListDetail;
